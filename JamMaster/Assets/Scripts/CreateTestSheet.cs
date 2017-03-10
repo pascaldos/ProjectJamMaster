@@ -14,7 +14,7 @@ public class CreateTestSheet : MonoBehaviour
 
     private GameObject[,] Grid;
 
-    // Use this for initialization
+
     public void OnTestSheetCreation(GameObject Panel)
     {
         Panel.SetActive(true);
@@ -24,8 +24,8 @@ public class CreateTestSheet : MonoBehaviour
         TotalNodes = (int)(Settings.Length / NodeLength);
 
         CreateGrid();
+        SetIsPlaying();
     }
-
 
     void CreateGrid()
     {
@@ -47,15 +47,43 @@ public class CreateTestSheet : MonoBehaviour
         for (int y = 0; y < Settings.UsedInstruments.Count; y++)
         {
             float currentImportance = Settings.UsedInstruments[y].OverallImportance;
-
             for (int x = 0; x < TotalNodes; x++)
             {
-                if() Random.Range(0,1)
+                if (UnityEngine.Random.Range(0, 100) > currentImportance)
+                {
+                    Grid[x, y].GetComponent<Renderer>().material.color = OffColor;
+                }
+                else
+                {
+                    Grid[x, y].GetComponent<Renderer>().material.color = BackGroundColor;
+                }
             }
         }
     }
     void SetSolo()
     {
+        int typeValue = 0;
+        int harmonyValue = 0;
+        int melodyValue = 0;
+        int rythmValue = 0;
+
+        foreach (Instrument I in Settings.instance.UsedInstruments)
+        {
+            if (I.Type == InstrumentType.Harmony)
+            {
+                harmonyValue = 1;
+            }
+            if (I.Type == InstrumentType.Melody)
+            {
+                melodyValue = 2;
+            }
+            if (I.Type == InstrumentType.Rythm)
+            {
+                rythmValue = 4;
+            }
+        }
+
+        typeValue = harmonyValue + melodyValue + rythmValue;
 
     }
 

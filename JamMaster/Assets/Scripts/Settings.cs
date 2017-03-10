@@ -70,11 +70,11 @@ public class Settings : MonoBehaviour
         {
             Length = 0;
             int count = 0;
-            string[] words2 = self.text.Split(delimiterChars);
-            for (int x = words2.Length - 1; x >= 0; x--)
+            string[] words = self.text.Split(delimiterChars);
+            for (int x = words.Length - 1; x >= 0; x--)
             {
                 int i = 0;
-                int.TryParse(words2[x], out i);
+                int.TryParse(words[x], out i);
                 Length += i * (int)(Mathf.Pow(60, count));
                 count++;
             }
