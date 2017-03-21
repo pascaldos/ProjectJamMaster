@@ -8,7 +8,7 @@ public class CreateTestSheet : MonoBehaviour
     public Color SoloColor;
     public Color BackGroundColor;
     public Color OffColor;
-    private Settings Settings;
+    private Settings Setting;
     public float NodeLength;
     public int TotalNodes;
 
@@ -19,21 +19,22 @@ public class CreateTestSheet : MonoBehaviour
     {
         Panel.SetActive(true);
 
-        Settings = Settings.instance;
-        NodeLength = (float)60 / (float)Settings.BPM * (float)Settings.PatternLength * Settings.Tact;
-        TotalNodes = (int)(Settings.Length / NodeLength);
+        Setting = Settings.instance;
+        NodeLength = (float)60 / (float)Setting.BPM * (float)Setting.PatternLength * Setting.Tact;
+        TotalNodes = (int)(Setting.Length / NodeLength);
 
         CreateGrid();
         SetIsPlaying();
+        SetSolo();
     }
 
     void CreateGrid()
     {
-        Grid = new GameObject[TotalNodes, Settings.UsedInstruments.Count];
+        Grid = new GameObject[TotalNodes, Setting.UsedInstruments.Count];
 
         for (int x = 0; x < TotalNodes; x++)
         {
-            for (int y = 0; y < Settings.UsedInstruments.Count; y++)
+            for (int y = 0; y < Setting.UsedInstruments.Count; y++)
             {
                 GameObject go = Instantiate(Quad, new Vector3(x, y, 0), Quaternion.identity);
                 go.transform.parent = this.transform;
@@ -44,12 +45,12 @@ public class CreateTestSheet : MonoBehaviour
 
     void SetIsPlaying()
     {
-        for (int y = 0; y < Settings.UsedInstruments.Count; y++)
+        for (int y = 0; y < Setting.UsedInstruments.Count; y++)
         {
-            float currentImportance = Settings.UsedInstruments[y].OverallImportance;
+            float currentImportance = Setting.UsedInstruments[y].OverallImportance;
             for (int x = 0; x < TotalNodes; x++)
             {
-                if (UnityEngine.Random.Range(0, 100) > currentImportance)
+                if (Random.Range(0, 100) > currentImportance)
                 {
                     Grid[x, y].GetComponent<Renderer>().material.color = OffColor;
                 }
@@ -62,31 +63,96 @@ public class CreateTestSheet : MonoBehaviour
     }
     void SetSolo()
     {
-        int typeValue = 0;
-        int harmonyValue = 0;
-        int melodyValue = 0;
-        int rythmValue = 0;
-
-        foreach (Instrument I in Settings.instance.UsedInstruments)
+        for (int i = 0; i < TotalNodes; i++)
         {
-            if (I.Type == InstrumentType.Harmony)
+            float typeValue = 0;
+            float harmonyValue = 0;
+            float melodyValue = 0;
+            float rythmValue = 0;
+
+            foreach (Instrument I in Setting.UsedInstruments)
             {
-                harmonyValue = 1;
+                if (I.Type == InstrumentType.Harmony)
+                {
+                    harmonyValue = I.SoloImportance;
+                }
+                if (I.Type == InstrumentType.Melody)
+                {
+                    melodyValue = I.SoloImportance;
+                }
+                if (I.Type == InstrumentType.Rythm)
+                {
+                    rythmValue = I.SoloImportance;
+                }
             }
-            if (I.Type == InstrumentType.Melody)
+
+            typeValue = harmonyValue + melodyValue + rythmValue;
+
+            if (typeValue == 0)
             {
-                melodyValue = 2;
+                Debug.LogError("NO INSTRUMENTS");
             }
-            if (I.Type == InstrumentType.Rythm)
+
+
+            int Rnd = Random.Range(0, (int)typeValue);
+
+            List<int> TempList = new List<int>();
+            int count = 0;
+            int RandomOfType = 0;
+            if (Rnd < harmonyValue)
             {
-                rythmValue = 4;
+                foreach (Instrument I in Setting.UsedInstruments)
+                {
+                    if (I.Type == InstrumentType.Harmony)
+                    {
+                        if (Grid[i, count].GetComponent<Renderer>().material.color != OffColor)
+                        {
+                            TempList.Add(count);
+                        }
+                    }
+                    count++;
+                }
+
+                RandomOfType = Random.Range(0, TempList.Count - 1);
+            }
+            if (Rnd >= harmonyValue && Rnd < harmonyValue + melodyValue)
+            {
+                foreach (Instrument I in Setting.UsedInstruments)
+                {
+                    if (I.Type == InstrumentType.Melody)
+                    {
+                        if (Grid[i, count].GetComponent<Renderer>().material.color != OffColor)
+                        {
+                            TempList.Add(count);
+                        }
+                    }
+                    count++;
+                }
+                RandomOfType = Random.Range(0, TempList.Count - 1);
+
+            }
+            if (Rnd > harmonyValue + melodyValue)
+            {
+                foreach (Instrument I in Setting.UsedInstruments)
+                {
+                    if (I.Type == InstrumentType.Rythm)
+                    {
+                        if (Grid[i, count].GetComponent<Renderer>().material.color != OffColor)
+                        {
+                            TempList.Add(count);
+                        }
+                    }
+                    count++;
+                    RandomOfType = Random.Range(0, TempList.Count - 1);
+                }
+            }
+
+            if(TempList.Count != 0)
+            {
+                Grid[i, TempList[RandomOfType]].GetComponent<Renderer>().material.color = SoloColor;
             }
         }
-
-        typeValue = harmonyValue + melodyValue + rythmValue;
-
     }
-
     void SetVolume()
     {
 

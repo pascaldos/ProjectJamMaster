@@ -9,7 +9,6 @@ public class Instrument : MonoBehaviour
     public float OverallImportance;
     public float SoloImportance;
 
-
     void Start()
     {
         if (Type == InstrumentType.Rythm)
